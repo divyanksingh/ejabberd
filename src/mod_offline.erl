@@ -383,7 +383,7 @@ need_to_store(LServer, #message{type = Type} = Packet) ->
 		    true;
 		no_store ->
 		    false;
-		none when Type == headline; Type == groupchat ->
+		none when Type == groupchat ->
 		    false;
 		none ->
 		    case gen_mod:get_module_opt(
