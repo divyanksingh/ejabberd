@@ -1289,10 +1289,17 @@ add_rosteritem(LocalUser, LocalServer, User, Server, Nick, Group, Subs) ->
     case add_rosteritem(LocalUser, LocalServer, User, Server, Nick, Group, Subs, []) of
 	{atomic, ok} ->
 	    push_roster_item(LocalUser, LocalServer, User, Server, {add, Nick, Subs, Group}),
-	    ok;
+	    case add_rosteritem(User, Server, LocalUser, LocalServer, Nick, Group, Subs, []) of
+		{atomic, ok} ->
+		    push_roster_item(LocalUser, LocalServer, User, Server, {add, Nick, Subs, Group}),
+		    ok;
+		_ ->
+		    error
+		end;
 	_ ->
 	    error
     end.
+
 
 add_rosteritem(LU, LS, User, Server, Nick, Group, Subscription, Xattrs) ->
     subscribe(LU, LS, User, Server, Nick, Group, Subscription, Xattrs).
