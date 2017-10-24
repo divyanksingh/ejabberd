@@ -1307,6 +1307,7 @@ delete_rosteritem(LocalUser, LocalServer, User, Server) ->
     case unsubscribe(LocalUser, LocalServer, User, Server) of
 	{atomic, ok} ->
 	    push_roster_item(LocalUser, LocalServer, User, Server, remove),
+	    push_roster_item(User, Server, LocalUser, LocalServer, remove),
 	    ok;
 	_  ->
 	    error
