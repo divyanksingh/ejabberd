@@ -183,18 +183,18 @@ process_bytestreams(#iq{type = get, from = JID, to = To, lang = Lang} = IQ) ->
 	    StreamHost = get_streamhost(Host, ServerHost),
 	    xmpp:make_iq_result(IQ, #bytestreams{hosts = [StreamHost]});
 	deny ->
-	    xmpp:make_error(IQ, xmpp:err_forbidden(<<"Denied by ACL">>, Lang))
+	    xmpp:make_error(IQ, xmpp:err_forbidden(<<"Access denied by service policy">>, Lang))
     end;
 process_bytestreams(#iq{type = set, lang = Lang,
 			sub_els = [#bytestreams{sid = SID}]} = IQ)
   when SID == <<"">> orelse size(SID) > 128 ->
     Why = {bad_attr_value, <<"sid">>, <<"query">>, ?NS_BYTESTREAMS},
-    Txt = xmpp:format_error(Why),
+    Txt = xmpp:io_format_error(Why),
     xmpp:make_error(IQ, xmpp:err_bad_request(Txt, Lang));
 process_bytestreams(#iq{type = set, lang = Lang, 
 			sub_els = [#bytestreams{activate = undefined}]} = IQ) ->
     Why = {missing_cdata, <<"">>, <<"activate">>, ?NS_BYTESTREAMS},
-    Txt = xmpp:format_error(Why),
+    Txt = xmpp:io_format_error(Why),
     xmpp:make_error(IQ, xmpp:err_jid_malformed(Txt, Lang));
 process_bytestreams(#iq{type = set, lang = Lang, from = InitiatorJID, to = To,
 			sub_els = [#bytestreams{activate = TargetJID,
@@ -232,7 +232,7 @@ process_bytestreams(#iq{type = set, lang = Lang, from = InitiatorJID, to = To,
 		    xmpp:make_error(IQ, xmpp:err_internal_server_error(Txt, Lang))
 	    end;
 	deny ->
-	    Txt = <<"Denied by ACL">>,
+	    Txt = <<"Access denied by service policy">>,
 	    xmpp:make_error(IQ, xmpp:err_forbidden(Txt, Lang))
     end.
 

@@ -314,6 +314,16 @@ handle_info({'$gen_event', {xmlstreamstart, Name, Attrs}},
 		      send_pkt(State1, Err)
 	      end
       end);
+handle_info({'$gen_event', El}, #{stream_state := wait_for_stream} = State) ->
+    %% TODO: find and fix this in fast_xml
+    error_logger:error_msg("unexpected event from receiver: ~p; "
+			   "xmlstreamstart was expected", [El]),
+    State1 = send_header(State),
+    noreply(
+      case is_disconnected(State1) of
+	  true -> State1;
+	  false -> send_pkt(State1, xmpp:serr_invalid_xml())
+      end);
 handle_info({'$gen_event', {xmlstreamerror, Reason}}, #{lang := Lang}= State) ->
     State1 = send_header(State),
     noreply(
@@ -1117,17 +1127,17 @@ format_inet_error(Reason) ->
 	Txt -> Txt
     end.
 
--spec format_stream_error(atom() | 'see-other-host'(), undefined | text()) -> string().
+-spec format_stream_error(atom() | 'see-other-host'(), [text()]) -> string().
 format_stream_error(Reason, Txt) ->
     Slogan = case Reason of
 		 undefined -> "no reason";
 		 #'see-other-host'{} -> "see-other-host";
 		 _ -> atom_to_list(Reason)
 	     end,
-    case Txt of
-	undefined -> Slogan;
-	#text{data = <<"">>} -> Slogan;
-	#text{data = Data} ->
+    case xmpp:get_text(Txt) of
+	<<"">> ->
+	    Slogan;
+	Data ->
 	    binary_to_list(Data) ++ " (" ++ Slogan ++ ")"
     end.
 

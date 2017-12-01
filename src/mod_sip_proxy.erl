@@ -20,8 +20,9 @@
 %%% You should have received a copy of the GNU General Public License along
 %%% with this program; if not, write to the Free Software Foundation, Inc.,
 %%% 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-
+%%%
 %%%-------------------------------------------------------------------
+
 -module(mod_sip_proxy).
 
 -ifndef(SIP).
@@ -269,11 +270,16 @@ cancel_pending_transactions(State) ->
     lists:foreach(fun esip:cancel/1, State#state.tr_ids).
 
 add_certfile(LServer, Opts) ->
-    case ejabberd_config:get_option({domain_certfile, LServer}) of
-	CertFile when is_binary(CertFile), CertFile /= <<"">> ->
+    case ejabberd_pkix:get_certfile(LServer) of
+	{ok, CertFile} ->
 	    [{certfile, CertFile}|Opts];
-	_ ->
-	    Opts
+	error ->
+	    case ejabberd_config:get_option({domain_certfile, LServer}) of
+		CertFile when is_binary(CertFile) ->
+		    [{certfile, CertFile}|Opts];
+		_ ->
+		    Opts
+	    end
     end.
 
 add_via(#sip_socket{type = Transport}, LServer, #sip{hdrs = Hdrs} = Req) ->

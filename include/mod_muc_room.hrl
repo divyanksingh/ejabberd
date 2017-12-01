@@ -64,7 +64,8 @@
     logging                              = false :: boolean(),
     vcard                                = <<"">> :: binary(),
     captcha_whitelist                    = (?SETS):empty() :: ?TGB_SET,
-    mam                                  = false :: boolean()
+    mam                                  = false :: boolean(),
+    pubsub                               = <<"">> :: binary()
 }).
 
 -type config() :: #config{}.
@@ -112,7 +113,7 @@
     nicks                   = (?DICT):new() :: ?TDICT,
     affiliations            = (?DICT):new() :: ?TDICT,
     history                 :: lqueue(),
-    subject                 = <<"">> :: binary(),
+    subject                 = [] :: [text()],
     subject_author          = <<"">> :: binary(),
     just_created            = false :: boolean(),
     activity                = treap:empty() :: treap:treap(),
